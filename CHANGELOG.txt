@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.08] - 2024-05-07
+### Addition
+        - Support loew octave in wave channel
+
 ## [1.07] - 2022-05-12
 ### Addition
 	- New less clicky volume change

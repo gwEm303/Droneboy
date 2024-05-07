@@ -2,22 +2,28 @@
 //#include <gb/bgb_emu.h> 
 //chord view
 
-UINT8 chord_on = 0; // this will play the chord
-int chord_root_note = 24; // root note taken from frequencies table
-int major_minor = 0; // 0 major, 1 minor
-int aug_dim_norm = 0; // 0 norm, 1 augmented, 2 diminished
-BYTE bpm_blink_state = 0;
+UINT8 chord_on        = 0;  // this will play the chord
+int   chord_root_note = 24; // root note taken from frequencies table
+int   major_minor     = 0;  // 0 major, 1 minor
+int   aug_dim_norm    = 0;  // 0 norm, 1 augmented, 2 diminished
+BYTE  bpm_blink_state = 0;
 
 // This controlls which mode is used
-void chordKeypadController() {
-  if (KEY_TICKED(J_B)) {
-    if(KEY_PRESSED(J_A)) {
-      if (chord_mode == 0) {
+void chordKeypadController() 
+{
+  if (KEY_TICKED(J_B)) 
+  {
+    if(KEY_PRESSED(J_A)) 
+    {
+      if (chord_mode == 0) 
+      {
         chord_mode = 1;
         doPlayCurrentChord = 0;
         doSetCurrentStep = 0;
         keys = 0;
-      } else {
+      } 
+      else 
+      {
         chord_mode = 0;       
         doPlayCurrentChord = 0;
         doSetCurrentStep = 0;
@@ -29,11 +35,13 @@ void chordKeypadController() {
   }
   switch(chord_mode)
   {
-    case 0: {
+    case 0: 
+    {
       chordChangeMode();
       break;
     }
-    case 1: {
+    case 1: 
+    {
       chordSteppaMode();
       break;
     }
@@ -41,66 +49,101 @@ void chordKeypadController() {
 }
 
 // chord change keypad controller
-void chordChangeMode() {  
-  if (KEY_RELEASED(J_A) && doPlayCurrentChord == 1) {
+void chordChangeMode() 
+{  
+  if (KEY_RELEASED(J_A) && doPlayCurrentChord == 1) 
+  {
     playCurrentChord();  
     doPlayCurrentChord = 0;
   }
-  if (KEY_RELEASED(J_B) && doSetCurrentStep == 1) {
+  if (KEY_RELEASED(J_B) && doSetCurrentStep == 1) 
+  {
     saveCurrentStep();
     printCurrentStep(current_record_steppa_step);
     doSetCurrentStep = 0;
   }
-  if (KEY_TICKED(J_UP)) {
-    if(KEY_PRESSED(J_A)) {
+  if (KEY_TICKED(J_UP)) 
+  {
+    if(KEY_PRESSED(J_A)) 
+    {
       chordPartRouter(J_UP, 12);
       doPlayCurrentChord = 0; // not turning chord on, just 12 semi tone jump
-    } else if(KEY_PRESSED(J_B)) {
+    } 
+    else if(KEY_PRESSED(J_B)) 
+    {
       chordPartRouter(J_UP, 3);
       doSetCurrentStep = 0;
-    } else {    
+    } 
+    else 
+    {    
       chordPartRouter(J_UP, 1);
     }
-  } else if (KEY_TICKED(J_DOWN)) { 
-    if(KEY_PRESSED(J_A)) {
+  } 
+  else if (KEY_TICKED(J_DOWN)) 
+  { 
+    if(KEY_PRESSED(J_A)) 
+    {
       chordPartRouter(J_DOWN, 12);
       doPlayCurrentChord = 0; 
-    } else if(KEY_PRESSED(J_B)) {
+    } 
+    else if(KEY_PRESSED(J_B)) 
+    {
       chordPartRouter(J_DOWN, 3);
       doSetCurrentStep = 0;
-    } else {    
+    } 
+    else 
+    {    
       chordPartRouter(J_DOWN, 1);
     }
-  } else if (KEY_TICKED(J_RIGHT)) { // move record marker in stepper
-    if(KEY_PRESSED(J_A)) {
+  } 
+  else if (KEY_TICKED(J_RIGHT)) 
+  { // move record marker in stepper
+    if(KEY_PRESSED(J_A)) 
+    {
       chordStepRecordRouter(J_RIGHT, 1);
       doPlayCurrentChord = 0; 
-    } else {    
+    } 
+    else
+    {    
       changeChordPart(J_RIGHT);
       waitpadup(); // eller...
     }
-  } else if (KEY_TICKED(J_LEFT)) { 
-    if(KEY_PRESSED(J_A)) {
+  } 
+  else if (KEY_TICKED(J_LEFT)) 
+  { 
+    if(KEY_PRESSED(J_A)) 
+    {
       chordStepRecordRouter(J_LEFT, 1);
       doPlayCurrentChord = 0; 
-    } else {    
+    } 
+    else 
+    {    
       changeChordPart(J_LEFT);
       waitpadup();
     }
-  } else if (KEY_TICKED(J_B)) {
+  } 
+  else if (KEY_TICKED(J_B)) 
+  {
     doSetCurrentStep = 1;
-  } else if (KEY_TICKED(J_A)) {
+  } 
+  else if (KEY_TICKED(J_A)) 
+  {
     doPlayCurrentChord = 1;
   }
 }
 
 // this is to indicate the BPM speed in top right corner
-void blinkBPM() {
-  if (active_control_page == 3) {
-    if(bpm_blink_state == 0) {
+void blinkBPM() 
+{
+  if (active_control_page == 3) 
+  {
+    if(bpm_blink_state == 0) 
+    {
       set_bkg_tile_xy(0x13, 0x00, 0x46);
       bpm_blink_state = 1;
-    } else {
+    } 
+    else 
+    {
       set_bkg_tile_xy(0x13, 0x00, 0x47);
       bpm_blink_state = 0;
     }
@@ -108,72 +151,104 @@ void blinkBPM() {
 }
 
 // play chord step while sequencer is running, called by timer function
-void playChordStep() {
+void playChordStep() 
+{
   // reached number of beats pre step?
-  if ( beats_counter == beats_per_step-1) {
+  if ( beats_counter == beats_per_step-1) 
+  {
     playNextChord();
     beats_counter = 0;
-  } else {
+  } 
+  else 
+  {
     beats_counter++;
   }
 }
 
 // play the nex chord in the sequencer
-void playNextChord() {
-  if (current_seq_chord == 7) {
+void playNextChord() 
+{
+  if (current_seq_chord == 7) 
+  {
       current_seq_chord = 0;
-    } else {
+  } 
+  else 
+  {
       current_seq_chord += 1;
-    }
-    playCurrentSeqStep();
+  }
+  playCurrentSeqStep();
 }
 
 // play the current step while sequencer is running
-void playCurrentSeqStep() {
-  int w = 0;
+void playCurrentSeqStep() 
+{
+  int w  = 0;
   int sq = 0;
+
   sq = chordsteppa[current_seq_chord].root + ((chordsteppa[current_seq_chord].majmin == 0) ? 4 : 3); 
-  if (chordsteppa[current_seq_chord].adn == 1) {
+
+  if (chordsteppa[current_seq_chord].adn == 1) 
+  {
     w = chordsteppa[current_seq_chord].root + 8;
-  } else if (chordsteppa[current_seq_chord].adn == 2) { // deminisehed
+  }
+  else if (chordsteppa[current_seq_chord].adn == 2) 
+  { // diminished
     w = chordsteppa[current_seq_chord].root + 6;
-  } else { // fallback 0 norm, this is for E8 chords basically 
+  }
+  else 
+  { // fallback 0 norm, this is for E8 chords basically 
     w = chordsteppa[current_seq_chord].root + 7;
   }
-  sweep_note = chordsteppa[current_seq_chord].root;
+  sweep_note  = chordsteppa[current_seq_chord].root;
   square_note = sq;
-  wave_note = w;
+  wave_note   = w + 12;
   updateSweepFreq(1);
   updateSquareFreq(1);
   updateWaveFreq(1);
 }
 
 // chord step keydap controller
-void chordSteppaMode() {
-  if (KEY_PRESSED(J_RIGHT)) { 
+void chordSteppaMode() 
+{
+  if (KEY_PRESSED(J_RIGHT)) 
+  { 
     stepChordSteppa(J_RIGHT);
     waitpadup();
-  } else if (KEY_PRESSED(J_LEFT)) { 
+  } 
+  else if (KEY_PRESSED(J_LEFT)) 
+  { 
     stepChordSteppa(J_LEFT);
     waitpadup();
-  } else if (KEY_PRESSED(J_B)) {
+  } 
+  else if (KEY_PRESSED(J_B)) 
+  {
     playCurrentStep();
     waitpadup();
   }
 }
 
 // step in da steppa
-void stepChordSteppa(BYTE direction) {
-  if (direction == J_RIGHT) {
-    if (current_chord_steppa_step == 7) {
+void stepChordSteppa(BYTE direction) 
+{
+  if (direction == J_RIGHT)  
+  {
+    if (current_chord_steppa_step == 7) 
+    {
       current_chord_steppa_step = 0;
-    } else {
+    } 
+    else  
+    {
       current_chord_steppa_step += 1;
     }
-  } else { //left
-    if (current_chord_steppa_step == 0) {
+  } 
+  else 
+  { //left
+    if (current_chord_steppa_step == 0) 
+    {
       current_chord_steppa_step = 7;
-    } else {
+    } 
+    else  
+    {
       current_chord_steppa_step -= 1;
     }
   }
@@ -181,42 +256,53 @@ void stepChordSteppa(BYTE direction) {
 }
 
 // saves the current chord in the current step
-void saveCurrentStep() {
-  chordsteppa[current_record_steppa_step].root = chord_root_note;
+void saveCurrentStep() 
+{
+  chordsteppa[current_record_steppa_step].root   = chord_root_note;
   chordsteppa[current_record_steppa_step].majmin = major_minor;
-  chordsteppa[current_record_steppa_step].adn = aug_dim_norm;
+  chordsteppa[current_record_steppa_step].adn    = aug_dim_norm;
 }
 
 // plays current step
-void playCurrentStep() {
+void playCurrentStep() 
+{
   frequency_mode = 1; // we are now floatin in note mode baby
-  int w = 0;
+  int w  = 0;
   int sq = 0;
   sq = chordsteppa[current_chord_steppa_step].root + ((chordsteppa[current_chord_steppa_step].majmin == 0) ? 4 : 3); 
-  if (chordsteppa[current_chord_steppa_step].adn == 1) {
+  if (chordsteppa[current_chord_steppa_step].adn == 1) 
+  {
     w = chordsteppa[current_chord_steppa_step].root + 8;
-  } else if (chordsteppa[current_chord_steppa_step].adn == 2) { // deminisehed
+  }
+  else if (chordsteppa[current_chord_steppa_step].adn == 2) 
+  { // diminished
     w = chordsteppa[current_chord_steppa_step].root + 6;
-  } else { // fallback 0 norm, this is for E8 chords basically 
+  } 
+  else 
+  { // fallback 0 norm, this is for E8 chords basically 
     w = chordsteppa[current_chord_steppa_step].root + 7;
   }
-  sweep_note = chordsteppa[current_chord_steppa_step].root;
+  sweep_note  = chordsteppa[current_chord_steppa_step].root;
   square_note = sq;
-  wave_note = w;
+  wave_note   = w + 12;
   updateSweepFreq(1);
   updateSquareFreq(1);
   updateWaveFreq(1);
 }
 
 // decide direction of record marker on stepper part
-void chordStepRecordRouter(BYTE direction, int num) {
-  if (direction == J_RIGHT) {
+void chordStepRecordRouter(BYTE direction, int num) 
+{
+  if (direction == J_RIGHT) 
+  {
     if (current_record_steppa_step == 7) {
       current_record_steppa_step = 0;
     } else {
       current_record_steppa_step += num;
     }
-  } else { //left
+  } 
+  else 
+  { //left
     if (current_record_steppa_step == 0) {
       current_record_steppa_step = 7;
     } else {
@@ -227,23 +313,28 @@ void chordStepRecordRouter(BYTE direction, int num) {
 }
 
 // this will move the record marker on the stepper part
-void updateRecordMarker() {
+void updateRecordMarker() 
+{
   move_sprite(39, chord_steppa_step[current_record_steppa_step].x, 152);
 }
 
 // send args to correct function according to current chord part
-void chordPartRouter(BYTE direction, int num) {
+void chordPartRouter(BYTE direction, int num) 
+{
   switch(current_chord_step)
   {
-    case 0: { // change root note
+    case 0: 
+    { // change root note
       changeRootNote(direction, num);
       break;
     }
-    case 1: { // change minor or major flag
+    case 1: 
+    { // change minor or major flag
       changeMinorMajor(direction);
       break;
     }
-    case 2: { // augmented, diminished or "normal"
+    case 2: 
+    { // augmented, diminished or "normal"
       changeAugDimNorm(direction);
       break;
     }
@@ -253,26 +344,36 @@ void chordPartRouter(BYTE direction, int num) {
 // Change the root note of the chord A-G 12 semitones
 // play if chord mode is on
 // redraw the sprites
-void changeRootNote(BYTE direction, int num) {
-  if (direction == J_UP && (chord_root_note + num <= 64)) {
+void changeRootNote(BYTE direction, int num) 
+{
+  if (direction == J_UP && (chord_root_note + num <= 64)) 
+  {
     chord_root_note += num;
-  } else if(direction == J_DOWN && (chord_root_note - num >= 0)) {
+  } 
+  else if(direction == J_DOWN && (chord_root_note - num >= 0)) 
+  {
     chord_root_note -= num;
   }
-  if (chord_on) {
+  if (chord_on) 
+  {
     changeNotes();
   }
   printChordParts();
 }
 
 // Minor major switch
-void changeMinorMajor(BYTE direction) {
-  if (direction == J_UP ) {
+void changeMinorMajor(BYTE direction) 
+{
+  if (direction == J_UP ) 
+  {
     major_minor = (major_minor == 0) ? 1 : 0;
-  } else if(direction == J_DOWN ) {
+  } 
+  else if(direction == J_DOWN ) 
+  {
     major_minor = (major_minor == 0) ? 1 : 0;
   }
-  if (chord_on) {
+  if (chord_on) 
+  {
     changeNotes();
   }
   printChordParts();
@@ -280,21 +381,32 @@ void changeMinorMajor(BYTE direction) {
 
 // this will affect the 5th of a triad chord
 // augmented, diminished and normal mode.
-void changeAugDimNorm(BYTE direction) {
-  if (direction == J_UP ) {
-    if (aug_dim_norm == 2) {
+void changeAugDimNorm(BYTE direction) 
+{
+  if (direction == J_UP ) 
+  {
+    if (aug_dim_norm == 2) 
+    {
       aug_dim_norm = 0;
-    } else {
+    } 
+    else 
+    {
       aug_dim_norm++;
     }
-  } else if(direction == J_DOWN ) {
-    if (aug_dim_norm == 0) {
+  } 
+  else if(direction == J_DOWN ) 
+  {
+    if (aug_dim_norm == 0) 
+    {
       aug_dim_norm = 2;
-    } else {
+    } 
+    else 
+    {
       aug_dim_norm--;
     }
   }
-  if (chord_on) {
+  if (chord_on) 
+  {
     changeNotes();
   }
   printChordParts();
@@ -302,9 +414,11 @@ void changeAugDimNorm(BYTE direction) {
 
 // this turns chord playing on or off
 // when off changes won't take effect immediatly
-void playCurrentChord() {
+void playCurrentChord() 
+{
   chord_on = (chord_on) ? 0 : 1; // flip true/false on/off
-  if (chord_on) {
+  if (chord_on) 
+  {
     frequency_mode = 1; // set to note mode
     changeNotes();
   }
@@ -312,17 +426,24 @@ void playCurrentChord() {
 }
 
 // changes the channels frequencies according to choosen chord
-void changeNotes() {
-  sweep_note = chord_root_note;
+void changeNotes() 
+{
+  sweep_note  = chord_root_note;
   square_note = chord_root_note + ((major_minor == 0) ? 4 : 3); // number of semitones for a major or minor chord
-  if (aug_dim_norm == 1 && chord_root_note < 64) { // 1 aug and less than highest root note for aug
+  if (aug_dim_norm == 1 && chord_root_note < 64) 
+  { // 1 aug and less than highest root note for aug
     wave_note = chord_root_note + 8;
-  } else if (aug_dim_norm == 2) { // deminisehed
+  } 
+  else if (aug_dim_norm == 2) 
+  { // diminished
     wave_note = chord_root_note + 6;
-  } else { // fallback 0 norm, this is for E8 chords basically 
+  } 
+  else 
+  { // fallback 0 norm, this is for E8 chords basically 
     wave_note = chord_root_note + 7;
   }
   
+  wave_note += 12;
   updateSweepFreq(1);
   updateSquareFreq(1);
   updateWaveFreq(1);
@@ -330,17 +451,27 @@ void changeNotes() {
 
 // This will step through the diffrent parts of the chord that is changeable
 // like root note, octave, major minor etc
-void changeChordPart(BYTE direction) {
-  if (direction == J_RIGHT) {
-    if (current_chord_step == 3 - 1) {
+void changeChordPart(BYTE direction) 
+{
+  if (direction == J_RIGHT) 
+  {
+    if (current_chord_step == 3 - 1) 
+    {
       current_chord_step = 0;
-    } else {
+    } 
+    else 
+    {
       current_chord_step += 1;
     }
-  } else { //left
-    if (current_chord_step == 0) {
+  } 
+  else  
+  { //left
+    if (current_chord_step == 0) 
+    {
       current_chord_step = 3 - 1;
-    } else {
+    }
+    else
+    {
       current_chord_step -= 1;
     }
   }
@@ -348,19 +479,22 @@ void changeChordPart(BYTE direction) {
 }
 
 // print the minor major indicator to screen
-void setMinorMajorSprites( int major_minor) {
+void setMinorMajorSprites( int major_minor) 
+{
   UINT8 spritenum = (major_minor == 0) ? 0x04 : 0x3E;
   set_bkg_tile_xy(0x06, 0x05, spritenum);
 }
 
 // print the on/off indicator to screen
-void setOnOffSprites() {
+void setOnOffSprites() 
+{
   UINT8 spritenum = ( chord_on == 0) ? 0x42 : 0x41;
   set_bkg_tile_xy(0x02, 0x02, spritenum);
 }
 
 // place the aug dim norm sprites
-void setAugDimNormprites() {
+void setAugDimNormprites() 
+{
   UINT8 spritenum = 0x04; // norm
   if (aug_dim_norm == 1) { // aug
     spritenum = 0x3F;  
@@ -371,27 +505,33 @@ void setAugDimNormprites() {
 }
 
 //print the chord parts to screen
-void printChordParts() {
-  setNoteSprites(20, chord_root_note);
+void printChordParts() 
+{
+  setNoteSprites      (20, chord_root_note + 12);
   setMinorMajorSprites(major_minor);
-  setAugDimNormprites();
+  setAugDimNormprites ();
 }
 
 // prints current step to the steppa
-void printCurrentStep(int step) {
-  int cp = 0;
-  int compare = noteNames[chordsteppa[step].root][0] == 32;
+void printCurrentStep(int step) 
+{
+  int cp      = 0;
+  int compare = noteNames[chordsteppa[step].root + 12][0] == 32;
   //BGB_printf("Compare: %d", compare);
-  if (compare) {
+  if (compare) 
+  {
     printWithoutHash(cp, step);
-  } else {
+  } 
+  else 
+  {
     printWithHash(cp, step);
   }
   printMinMajAugDim(step);
 }
 
 // prints minor major augmented or dimished part of chord
-void printMinMajAugDim(int step) {
+void printMinMajAugDim(int step) 
+{
   int num = 1;
   if (chordsteppa[step].majmin) { // 0 major, 1 minor
     if (chordsteppa[step].adn == 0) { // print only minor
@@ -431,46 +571,53 @@ void printWithHash(int cp, int step) {
       if (i == 3) { // octave 
          setNoteSpritesBg(chordsteppa[step].x, 
                    chordsteppa[step].y + (i - 1), 
-                   noteNames[chordsteppa[step].root][cp]);
+                   noteNames[chordsteppa[step].root + 12][cp]);
         cp++;
         continue;
       }
       setNoteSpritesBg(chordsteppa[step].x, 
                    chordsteppa[step].y + i, 
-                   noteNames[chordsteppa[step].root][cp]);
+                   noteNames[chordsteppa[step].root + 12][cp]);
       cp++;
     }
 }
 
 // when root note dosen't have a hash sign
-void printWithoutHash(int cp, int step) {
-  for (int i = 0; i < 4; i++) {
-      if (i == 0) { // skip first as this is blank
+void printWithoutHash(int cp, int step) 
+{
+  for (int i = 0; i < 4; i++) 
+  {
+      if (i == 0) 
+      { // skip first as this is blank
         cp++;
         continue;
       }
-      if (i == 1) {
+      if (i == 1) 
+      {
         // print
       }
-      if (i == 2) { // print blank
+      if (i == 2) 
+      { // print blank
         setNoteSpritesBg(chordsteppa[step].x, 
                    chordsteppa[step].y + (i-1), 
-                   noteNames[chordsteppa[step].root][0]);
+                   noteNames[chordsteppa[step].root + 12][0]);
         cp++;
         continue;   
       }
-      if (i == 3) { // octave
+      if (i == 3) 
+      { // octave
          // print
       }
       setNoteSpritesBg(chordsteppa[step].x, 
                    chordsteppa[step].y + (i-1), 
-                   noteNames[chordsteppa[step].root][cp]);
+                   noteNames[chordsteppa[step].root + 12][cp]);
       cp++;
     }
 }
 
 //this will print the sequence
-void printCurrentSeq() {
+void printCurrentSeq() 
+{
   for (int i = 0; i < 8; ++i)
   {
       printCurrentStep(i);
@@ -479,9 +626,10 @@ void printCurrentSeq() {
 
 
 /*
-* Set the note tiles
-*/
-void setNoteSpritesBg(int x, int y, int number) {
+ * Set the note tiles
+ */
+void setNoteSpritesBg(int x, int y, int number) 
+{
   switch(number)
   {
     case 1: // Minor
@@ -504,6 +652,9 @@ void setNoteSpritesBg(int x, int y, int number) {
         break;
     case 35: //#
         set_bkg_tile_xy(x, y, 0x43);
+        break;
+    case 50: //2
+        set_bkg_tile_xy(x, y, 0x17);
         break;
     case 51: //3 
         set_bkg_tile_xy(x, y, 0x18);

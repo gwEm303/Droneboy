@@ -73,12 +73,12 @@ extern UINT8 num_control_pages;
 extern int active_control_page;
 extern int credit_page;
 
-extern const char noteNames[72][5];
+extern const char  noteNames[84][5];
 extern const UWORD frequencies[72];
-extern const UBYTE squareSamples[32];
-extern const UBYTE sawSamples[128];
-extern const UBYTE triangleSamples[128];
-extern const UBYTE sineSamples[128];
+extern const UBYTE squareSamples[64];
+extern const UBYTE sawSamples[256];
+extern const UBYTE triangleSamples[256];
+extern const UBYTE sineSamples[256];
 extern const UBYTE noiseNotesFrequencies[6]; // this is the UBYTE for FF22 - NR43 - Polynomial Counter
 extern const int noiseNoteNameIndex[6]; // this is the index in noteNames
 extern const UBYTE volumeFaderPosition[16];
@@ -115,11 +115,11 @@ extern int doSetCurrentStep;
 
 // Chord step struct
 struct ChordStep {
-  UINT8 root; // chord root note
+  UINT8 root;   // chord root note
   UINT8 majmin; // major or minor
-  UINT8 adn; // norm, augmented, diminished
-  int x; // background sprite x position
-  UINT8 y; // background sprite y position
+  UINT8 adn;    // norm, augmented, diminished
+  int   x;      // background sprite x position
+  UINT8 y;      // background sprite y position
 };
 
 extern struct ChordStep chordsteppa[8];
@@ -140,8 +140,8 @@ extern int bpm;
 extern BYTE bpm_blink_state;
 
 extern int chord_root_note; // root note taken from frequencies table
-extern int major_minor; // 0 major, 1 minor
-extern int aug_dim_norm; // 0 norm, 1 augmented, 2 diminished
+extern int major_minor;     // 0 major, 1 minor
+extern int aug_dim_norm;    // 0 norm, 1 augmented, 2 diminished
 
 // volume values 0-15
 extern const UBYTE volumeValues[16];

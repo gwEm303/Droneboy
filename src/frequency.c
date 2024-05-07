@@ -420,6 +420,9 @@ void setNoteSprites(int position, int note_value) {
             case 35: //#
                 set_sprite_tile(position, 37);
                 break;
+            case 50: //2
+                set_sprite_tile(position, 6);
+                break;
             case 51: //3 
                 set_sprite_tile(position, 7);
                 break;
@@ -472,11 +475,11 @@ void printChannelNote(int channel) {
   switch(channel)
   {
     case 0: {
-        setNoteSprites(20, sweep_note);
+        setNoteSprites(20, sweep_note+12);
         break;
     }
     case 1: {
-        setNoteSprites(24, square_note);
+        setNoteSprites(24, square_note+12);
         break;
     }
     case 2: {
