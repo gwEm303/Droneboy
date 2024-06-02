@@ -5,25 +5,25 @@
 #include "globals.h"
 
 // Declaration of global variables
-BYTE keys = 0;
-UBYTE previous_keys;
+BYTE   keys                = 0;
+UBYTE  previous_keys;
 
-int   max_faders         = 4;
-int   num_faders         = 4;
+int    max_faders          = 4;
+int    num_faders          = 4;
 
-int   sweep_note         = 4;  // Tone channel 1 is called sweep
-int   square_note        = 11; // Tone channel 2 is called square
-int   wave_note          = 4;  // Channel 3 Wave Output is called wave
-int   noise_note         = 0;  // And noise channel 4 
-UWORD sweep_freq         = 457;  
-UWORD square_freq        = 986;
-UWORD wave_freq          = 457;
-UBYTE noise_freq         = 0;
-int   sweep_volume       = 0;
-int   sweep_up_down_flag = 1; //going up
-int   square_volume      = 0;
-int   wave_volume        = 0;
-int   noise_volume       = 0;
+int    sweep_note          = 4;  // Tone channel 1 is called sweep
+int    square_note         = 11; // Tone channel 2 is called square
+int    wave_note           = 4;  // Channel 3 Wave Output is called wave
+int    noise_note          = 0;  // And noise channel 4 
+UWORD  sweep_freq          = 457;  
+UWORD  square_freq         = 986;
+UWORD  wave_freq           = 457;
+UBYTE  noise_freq          = 0;
+int    sweep_volume        = 0;
+int    sweep_up_down_flag  = 1;  //going up
+int    square_volume       = 0;
+int    wave_volume         = 0;
+int    noise_volume        = 0;
 
 int    current_channel     = 0;
 int    credit_page         = 0;
@@ -37,11 +37,11 @@ int    current_chord_steppa_step  = 0;
 int    current_record_steppa_step = 0;
 
 // continuous sweep of freq and volume counters
-int up_sweep_counter     = 0;
-int down_sweep_counter   = 0;
-int up_volume_counter    = 0;
-int down_volume_counter  = 0;
-int volume_slide_counter = 0;
+int up_sweep_counter       = 0;
+int down_sweep_counter     = 0;
+int up_volume_counter      = 0;
+int down_volume_counter    = 0;
+int volume_slide_counter   = 0;
 
 // this are marker positions
 struct fader fader_group[4];
@@ -50,11 +50,11 @@ struct fader chord_part_step[4];
 struct fader chord_steppa_step[8];
 
 // duty 
-int duty_sweep  = 2;
-int duty_square = 2;
-int duty_wave   = 2;
+int   duty_sweep      = 3;
+int   duty_square     = 0;
+int   duty_wave       = 2;
 
-enum WAVES wave_type = SQUARE;
+enum  WAVES wave_type = SAW;
 
 const UBYTE dutyValues[4]             = {0x00, 0x40, 0x80, 0xC0};
 const UBYTE dutyFaderPosition[4]      = {111, 89, 65, 41};
@@ -64,27 +64,28 @@ const UBYTE dutyFaderPositionNoise[8] = {111, 100, 89, 80, 73, 65, 53, 41};
 struct MacroStatus volumeMacroStatus;
 struct MacroStatus dutyMacroStatus;
 struct MacroStatus freqMacroStatus;
-int domacro = 0;
+int domacro              = 0;
 
 // chord page A-button state
-int doPlayCurrentChord = 0;
+int doPlayCurrentChord   = 0;
 // chord page B-button state
-int doSetCurrentStep = 0;
+int doSetCurrentStep     = 0;
 
 // the chord steppa init
 struct ChordStep chordsteppa[8];
+
 // play the chord step sequencer, 0=off,1=on
-BYTE play_chord_step     = 0;
+BYTE   play_chord_step   = 0;
+
 // number of beats per step in sequencer
 UINT8  beats_per_step    = 1;
 UINT8  beats_counter     = 0;
 int    current_seq_chord = 0;
 
 // BPM globals
-unsigned int tim_cnt = 0;
-int bpm_in_cycles    = 2048;
-int bpm              = 120;
-
+unsigned int tim_cnt     = 0;
+int      bpm_in_cycles   = 2048;
+int      bpm             = 120;
 
 // Note names to display
 const char noteNames[84][5] = {
@@ -189,7 +190,7 @@ const UBYTE sineSamples[] = {
 };
 
 // intial wave
-UBYTE waveToBeLoaded[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+UBYTE waveToBeLoaded[16] = {0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x99, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00};
 
 // volume values for the "zombie" mode. https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Obscure_Behavior
 const UBYTE volumeValues[16] = {0x08, 0x18, 0x28, 0x38, 0x48, 0x58, 0x68, 0x78, 0x78, 0x98, 0xA8, 0xB8, 0xC8, 0xD8, 0xE8, 0xF8};
@@ -209,8 +210,10 @@ void main()
 
   // Set TMA to divide clock by 0x100
   TMA_REG = 0xFFU;
+
   // Set clock to 4096 Hertz 
   TAC_REG = 0x04U;
+
   // Handle VBL and TIM interrupts
   set_interrupts(VBL_IFLAG | TIM_IFLAG);
   init();
@@ -317,8 +320,8 @@ void changeControlPage(int to_page) {
 void goToCreditPage() {
   set_bkg_data(0,4, fadertile); // setup fader tiles
   set_bkg_tiles(0x00, 0x00, 20, 18, creditPageBackground);
-  // move the duty faders on screen
 
+  // move the duty faders on screen
   for (int i = 0; i <= max_faders-1; i++)
   {
     move_sprite(i, 1, 168);
@@ -340,6 +343,7 @@ void changeToFrequencyBackground() {
   set_bkg_data(0,4, fadertile); // setup fader tiles
   set_bkg_tiles(0x00, 0x00, 20, 18, frequencybackground); // the bakground
   setUpFrequencySprites();
+
   // this hides the sprites from duty page
   for (int i = 0; i <= max_faders-1; i++) 
   {
@@ -356,33 +360,33 @@ void changeToFrequencyBackground() {
 void setUpFrequencySprites() {
   // First the sweep channel
   current_channel = 0;
-  int value = sweep_freq;
-  int position = 4;
-  setCounterSprites(position, value); // setup the frequency tiles
-  clearCounterValues(position, 0); // clear if needed
+  int value       = sweep_freq;
+  int position    = 4;
+  setCounterSprites (position, value); // setup the frequency tiles
+  clearCounterValues(position, 0);     // clear if needed
   setNoteSprites(position+16, sweep_note+12); // set the note tiles
 
   // square
   current_channel = 1;
-  value = square_freq;
-  position = 8;
-  setCounterSprites(position, value);
+  value           = square_freq;
+  position        = 8;
+  setCounterSprites (position, value);
   clearCounterValues(position, 1);
   setNoteSprites(position+16, square_note+12);
 
   //wave
   current_channel = 2;
-  value = wave_freq;
-  position = 12;
-  setCounterSprites(position, value);
+  value           = wave_freq;
+  position        = 12;
+  setCounterSprites (position, value);
   clearCounterValues(position, 2);
   setNoteSprites(position+16, wave_note);
 
   //noise
   current_channel = 3;
-  value = noise_freq;
-  position = 16;
-  setCounterSprites(position, value);
+  value           = noise_freq;
+  position        = 16;
+  setCounterSprites (position, value);
   clearCounterValues(position, 3);
   // only a few "notes" available on the noise channel
   setNoteSprites(position+16, noiseNoteNameIndex[noise_note]);
@@ -394,15 +398,17 @@ void setUpFrequencySprites() {
   // sweep
   int sweep_x = 51; // coordinates
   int sweep_y = 57;
+
   // numbers
-  move_sprite(4, sweep_x, sweep_y); // 1
-  move_sprite(5, sweep_x-8, sweep_y); // 10
+  move_sprite(4, sweep_x, sweep_y);    // 1
+  move_sprite(5, sweep_x-8, sweep_y);  // 10
   move_sprite(6, sweep_x-16, sweep_y); // 100
   move_sprite(7, sweep_x-24, sweep_y); // 1000
+
   // notes
   sweep_y = sweep_y + 10; // 10 pixels under the freq tiles
-  move_sprite(20, sweep_x, sweep_y);
-  move_sprite(21, sweep_x-8, sweep_y); // decrese by 8 to move left
+  move_sprite(20, sweep_x,    sweep_y);
+  move_sprite(21, sweep_x-8,  sweep_y); // decrese by 8 to move left
   move_sprite(22, sweep_x-16, sweep_y);
   move_sprite(23, sweep_x-24, sweep_y);
 
@@ -413,6 +419,7 @@ void setUpFrequencySprites() {
   move_sprite(9,  square_x-8, square_y); 
   move_sprite(10, square_x-16, square_y); 
   move_sprite(11, square_x-24, square_y); 
+
   //notes
   square_y = square_y + 10;
   move_sprite(24, square_x, square_y);
@@ -423,11 +430,13 @@ void setUpFrequencySprites() {
   // wave
   int wave_x = 51;
   int wave_y = 121;
+
   //numbers
   move_sprite(12, wave_x, wave_y);
   move_sprite(13, wave_x-8, wave_y); 
   move_sprite(14, wave_x-16, wave_y); 
   move_sprite(15, wave_x-24, wave_y); 
+
   //notes
   wave_y = wave_y + 10;
   move_sprite(28, wave_x, wave_y);
@@ -438,11 +447,13 @@ void setUpFrequencySprites() {
   // noise
   int noise_x = 130;
   int noise_y = 121;
+
   //numbers
   move_sprite(16, noise_x, noise_y);
   move_sprite(17, noise_x-8, noise_y); 
   move_sprite(18, noise_x-16, noise_y); 
   move_sprite(19, noise_x-24, noise_y); 
+
   //notes
   noise_y = noise_y + 10;
   move_sprite(32, noise_x, noise_y);
@@ -458,6 +469,7 @@ void setUpFrequencySprites() {
 void changeToDutyBackground() {
   set_bkg_data(0,4, fadertile);
   set_bkg_tiles(0x00, 0x00, 20, 18, dutyfaderbackground);
+
   // move the duty faders on screen
   for (int i = 0; i <= max_faders-1; i++) {
     if (i == 3) {
@@ -690,14 +702,14 @@ void init() {
   // Volume envelope
   NR12_REG = 0x08; //0x00 // 0=min volume, length ignored
   // Duty
-  NR11_REG = 0x80; //0x80 // 50% square wave
+  NR11_REG = dutyValues[duty_sweep]; //0x80 // 50% square wave
   // Frequency
   updateSweepFreq(1);
 
   // square channel
   // https://gbdev.io/pandocs/Sound_Controller.html#sound-channel-2---tone
   NR22_REG = 0x00;
-  NR21_REG = 0x80;
+  NR21_REG = dutyValues[duty_square];
   updateSquareFreq( 1);
 
   // wave channel
@@ -706,31 +718,32 @@ void init() {
 
   // noise channel
   // https://gbdev.io/pandocs/Sound_Controller.html#sound-channel-4---noise
-  noiseStruct.dividing_ratio = 7; // 3 bits
-  noiseStruct.counter_step = 1; // 1 = 7bits, 0 = 15 bits
-  noiseStruct.clock_freq = noise_freq; // 4 bits
-  NR42_REG = 0x00;
-  NR41_REG = 0;
+  noiseStruct.dividing_ratio = 7;          // 3 bits
+  noiseStruct.counter_step   = 0;          // 1 = 7bits, 0 = 15 bits
+  noiseStruct.clock_freq     = noise_freq; // 4 bits
+  NR42_REG = 0x00; // volume and envelope
+  NR41_REG = 0;    // length
   updateNoiseFreq(noise_freq);
-  NR44_REG = 0x80;
+  NR44_REG = 0x80; // control
   
   // setup the background data
-  set_bkg_data(0,4, fadertile); 
-  set_bkg_data(4,1, blank);
-  set_bkg_data(5,16, pageheadertext);
-  set_bkg_data(21,10, frequencytiles);
-  set_bkg_data(31,8, icons);
-  set_bkg_data(39,2, macroMarker);
-  set_bkg_data(41,12, creditPageText);
-  set_bkg_data(53, 4, noiseCounterStepFlip);
-  set_bkg_data(57,17, waveforms);
+  set_bkg_data ( 0, 4, fadertile); 
+  set_bkg_data ( 4, 1, blank);
+  set_bkg_data ( 5,16, pageheadertext);
+  set_bkg_data (21,10, frequencytiles);
+  set_bkg_data (31, 8, icons);
+  set_bkg_data (39, 2, macroMarker);
+  set_bkg_data (41,12, creditPageText);
+  set_bkg_data (53, 4, noiseCounterStepFlip);
+  set_bkg_data (57,17, waveforms);
   set_bkg_tiles(0,0,20,18, volumefaderbackground);
 
   SHOW_BKG;
   DISPLAY_ON;
   SPRITES_8x8;
   set_sprite_data(0, 4, fadertile);
-  for (int i = 0; i < 4; ++i){
+  for (int i = 0; i < 4; ++i)
+  {
     set_sprite_tile(i, 0);
   }
 
@@ -750,19 +763,19 @@ void init() {
   // fader marker
   set_sprite_tile(37, 24);
   set_sprite_tile(38, 25);
-
   set_sprite_tile(39, 0x0E);
 
   // Volume faders
-  for (int i = 0; i < 4; ++i) {
-    fader_group[i].y = 119; // they start at the bottom
-    fader_group[i].fader_position = 0; // volume starts at zero
-    chord_part_step[i].y = 69;
+  for (int i = 0; i < 4; ++i) 
+  {
+    fader_group[i].y                  = 119; // they start at the bottom
+    fader_group[i].fader_position     = 0;   // volume starts at zero
+    chord_part_step[i].y              = 69;
     chord_part_step[i].fader_position = 0;
   }
   // from left to right 
-  fader_group[0].x = 32; // sweep 
-  fader_group[1].x = 72; // square
+  fader_group[0].x = 32;  // sweep 
+  fader_group[1].x = 72;  // square
   fader_group[2].x = 112; // wave
   fader_group[3].x = 152; // noise
 
@@ -775,34 +788,34 @@ void init() {
   // Duty faders
   // sweep
   duty_fader_group[0].x = 32; 
-  duty_fader_group[0].y = 65;
-  duty_fader_group[0].fader_position = 2;
+  duty_fader_group[0].y = dutyFaderPosition[duty_sweep];
+  duty_fader_group[0].fader_position = duty_sweep;
   // square
   duty_fader_group[1].x = 72;
-  duty_fader_group[1].y = 65;
-  duty_fader_group[1].fader_position = 2;
+  duty_fader_group[1].y = dutyFaderPosition[duty_square];
+  duty_fader_group[1].fader_position = duty_square;
   //wave
   duty_fader_group[2].x = 112;
-  duty_fader_group[2].y = 65;
-  duty_fader_group[2].fader_position = 2;
+  duty_fader_group[2].y = dutyFaderPosition[duty_wave];
+  duty_fader_group[2].fader_position = duty_wave;
   //noise
   duty_fader_group[3].x = 152;
-  duty_fader_group[3].y = 41;
-  duty_fader_group[3].fader_position = 7;
+  duty_fader_group[3].y = dutyFaderPositionNoise[noiseStruct.dividing_ratio];
+  duty_fader_group[3].fader_position = noiseStruct.dividing_ratio;
 
   // Macro markers
-  volumeMacroStatus.sweep = 0;
+  volumeMacroStatus.sweep  = 0;
   volumeMacroStatus.square = 0;
-  volumeMacroStatus.wave = 0;
-  volumeMacroStatus.noise = 0;
-  dutyMacroStatus.sweep = 0;
-  dutyMacroStatus.square = 0;
-  dutyMacroStatus.wave = 0;
-  dutyMacroStatus.noise = 0;
-  freqMacroStatus.sweep = 0;
-  freqMacroStatus.square = 0;
-  freqMacroStatus.wave = 0;
-  freqMacroStatus.noise = 0;
+  volumeMacroStatus.wave   = 0;
+  volumeMacroStatus.noise  = 0;
+  dutyMacroStatus.sweep    = 0;
+  dutyMacroStatus.square   = 0;
+  dutyMacroStatus.wave     = 0;
+  dutyMacroStatus.noise    = 0;
+  freqMacroStatus.sweep    = 0;
+  freqMacroStatus.square   = 0;
+  freqMacroStatus.wave     = 0;
+  freqMacroStatus.noise    = 0;
   // x first higher value ->
   // y second higher value down
   for (int i = 0; i < 4; ++i) {
